@@ -4,7 +4,9 @@ import axios from "axios"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
 import { useForm } from "react-hook-form"
-import { useRouter } from "next/router"
+import { useRouter } from "next/navigation"
+import toast from "react-hot-toast"
+
 
 import {
     Form,
@@ -15,8 +17,9 @@ import {
     FormMessage,
     FormItem,
 } from "@/components/ui/form"
-import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+
 
 
 const formSchema = z.object({
@@ -26,6 +29,7 @@ const formSchema = z.object({
 })
 
 const CreatePage = () => {
+    const router = useRouter()
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
@@ -34,8 +38,14 @@ const CreatePage = () => {
     })
 const {isSubmitting, isValid} = form.formState; 
 
-const onSubmit = (values: z.infer<typeof formSchema>) => {
-    console.log(values)
+const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    try {
+        const response  = await axios.post("/api/courses", values)
+        router.push(`/teacher/courses/${response.data.id}`)
+        toast.success("course created");
+    } catch {
+        toast.error("Something went wrong!")
+    }
 }
 
     return (
@@ -50,8 +60,8 @@ const onSubmit = (values: z.infer<typeof formSchema>) => {
                     Dont worry, you can change  this later.
                 </p>
                 <Form {...form}>
-                    <Form
-                    onSubmit={form.handleSubmit(onSubmit)}
+                    <form
+                    onSubmit ={form.handleSubmit(onSubmit)}
                     className="space-y-8 mt-8"
                     >
                         <FormField
@@ -92,7 +102,7 @@ const onSubmit = (values: z.infer<typeof formSchema>) => {
                                 Continue
                             </Button>
                         </div>
-                    </Form>
+                    </form>
                 </Form>
             </div>
         </div>
